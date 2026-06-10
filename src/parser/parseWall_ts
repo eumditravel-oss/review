@@ -1,0 +1,23 @@
+import type { WallData } from "../types/rebar";
+
+export function parseWall(ocrText: string): WallData {
+  const thickness = ocrText.match(/두께\s*\[?(\d+(?:\.\d+)?)\]?/)?.[1] ?? "";
+  const bars = [...ocrText.matchAll(/H\d+\s*@\s*\d+/g)].map((m) =>
+    m[0].replace(/\s+/g, "")
+  );
+
+  return {
+    thickness,
+    verticalOuter: bars[0] ?? "",
+    verticalInner: bars[1] ?? "",
+    horizontalOuter: bars[2] ?? "",
+    horizontalInner: bars[3] ?? "",
+    topCutBar: "",
+    bottomCutBar: "",
+    widthFixBar1: "",
+    widthFixBar2: "",
+    ucBar: "",
+    verticalReinforcement: "",
+    horizontalReinforcement: ""
+  };
+}
