@@ -1,0 +1,64 @@
+import type { RebarProject, RebarItem } from "../types/rebar";
+
+type Filters = {
+  partName: string;
+  dongName: string;
+  status: string;
+  keyword: string;
+};
+
+type Props = {
+  project: RebarProject;
+  filters: Filters;
+  selectedItem: RebarItem | null;
+  onSelect: (item: RebarItem) => void;
+};
+
+export function RebarListTable({ project, filters, selectedItem, onSelect }: Props) {
+  const items = project.buildings.flatMap((building) =>
+    building.parts.flatMap((part) => part.items)
+  );
+
+  const filtered = items.filter((item) => {
+    if (filters.partName !== "전체" && item.partName !== filters.partName) return false;
+    if (filters.dongName !== "전체" && item.dongName !== filters.dongName) return false;
+    if (filters.status !== "전체" && item.status !== filters.status) return false;
+    if (filters.keyword && !item.symbol.includes(filters.keyword)) return false;
+    return true;
+  });
+
+  return (
+    <table className="rebar-list-table">
+      <thead>
+        <tr>
+          <th>상태</th>
+          <th>파트</th>
+          <th>동명</th>
+          <th>Page</th>
+          <th>Card</th>
+          <th>명칭</th>
+          <th>부호</th>
+          <th>주요 정보</th>
+        </tr>
+      </thead>
+      <tbody>
+        {filtered.map((item) => (
+          <tr
+            key={`${item.page}-${item.cardIndex}-${item.symbol}`}
+            className={selectedItem === item ? "selected" : ""}
+            onClick={() => onSelect(item)}
+          >
+            <td>{item.status}</td>
+            <td>{item.partName}</td>
+            <td>{item.dongName}</td>
+            <td>{item.page}</td>
+            <td>{item.cardIndex}</td>
+            <td>{item.name}</td>
+            <td>{item.symbol}</td>
+            <td>{item.summary}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
