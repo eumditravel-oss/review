@@ -1,0 +1,27 @@
+{
+  "name": "rebar-pdf-reader",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rebar PDF reader and review system for construction reinforcement schedule PDFs.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext ts,tsx"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "typescript": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "pdfjs-dist": "latest",
+    "tesseract.js": "latest",
+    "xlsx": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest"
+  }
+}
