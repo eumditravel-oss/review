@@ -1,0 +1,86 @@
+{
+  "projectName": "[현대엔지니어링]용인 TEL 반도체 제조장비 T",
+  "sourceFile": "공사 배근자료 출력(1).pdf",
+  "pageCount": 34,
+  "buildings": [
+    {
+      "dongName": "FAB",
+      "parts": [
+        {
+          "partName": "기초",
+          "items": [
+            {
+              "page": 1,
+              "cardIndex": 4,
+              "partName": "기초",
+              "dongName": "FAB",
+              "name": "근",
+              "symbol": "MF1",
+              "summary": "두께 1.4 / 우마철근 H25@2000 / 상하부 H29@200",
+              "status": "확인필요",
+              "data": {
+                "thickness": "1.4",
+                "chairBar": "H25@2000 / 2000",
+                "topSubBar": "H29@200",
+                "bottomSubBar": "H29@200",
+                "topMainBar": "H29@200",
+                "bottomMainBar": "H29@200",
+                "reinforcement": []
+              }
+            }
+          ]
+        },
+        {
+          "partName": "계단",
+          "items": [
+            {
+              "page": 13,
+              "cardIndex": 2,
+              "partName": "계단",
+              "dongName": "FAB",
+              "name": "분할ST.",
+              "symbol": "SS1",
+              "summary": "두께 0.15 / 참부·계단부 주근·부근 분리",
+              "status": "확인필요",
+              "data": {
+                "thickness": "0.15",
+                "rows": [
+                  {
+                    "area": "참부",
+                    "barType": "주근",
+                    "position": "",
+                    "rebar": ""
+                  },
+                  {
+                    "area": "참부",
+                    "barType": "부근",
+                    "position": "",
+                    "rebar": ""
+                  },
+                  {
+                    "area": "계단부",
+                    "barType": "주근",
+                    "position": "",
+                    "rebar": ""
+                  },
+                  {
+                    "area": "계단부",
+                    "barType": "부근",
+                    "position": "",
+                    "rebar": ""
+                  },
+                  {
+                    "area": "보강근",
+                    "barType": "보강근",
+                    "position": "",
+                    "rebar": "H13-6EA"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
