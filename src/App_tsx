@@ -1,0 +1,63 @@
+import { useState } from "react";
+import { PdfUploader } from "./components/PdfUploader";
+import { RebarFilterPanel } from "./components/RebarFilterPanel";
+import { PdfPageViewer } from "./components/PdfPageViewer";
+import { RebarCardViewer } from "./components/RebarCardViewer";
+import { RebarListTable } from "./components/RebarListTable";
+import type { RebarProject, RebarItem } from "./types/rebar";
+
+export default function App() {
+  const [project, setProject] = useState<RebarProject | null>(null);
+  const [selectedItem, setSelectedItem] = useState<RebarItem | null>(null);
+  const [filters, setFilters] = useState({
+    partName: "전체",
+    dongName: "전체",
+    status: "전체",
+    keyword: ""
+  });
+
+  return (
+    <main className="app">
+      <header className="app-header">
+        <h1>PDF 배근자료 검토 시스템</h1>
+        <PdfUploader onParsed={setProject} />
+      </header>
+
+      {project && (
+        <section className="summary">
+          <div>공사명: {project.projectName}</div>
+          <div>총 페이지: {project.pageCount}</div>
+          <div>동 개수: {project.buildings.length}</div>
+        </section>
+      )}
+
+      {project && (
+        <section className="layout">
+          <aside className="filter-panel">
+            <RebarFilterPanel
+              project={project}
+              filters={filters}
+              onChange={setFilters}
+            />
+          </aside>
+
+          <section className="review-panel">
+            <RebarListTable
+              project={project}
+              filters={filters}
+              selectedItem={selectedItem}
+              onSelect={setSelectedItem}
+            />
+
+            {selectedItem && (
+              <div className="detail-grid">
+                <PdfPageViewer item={selectedItem} />
+                <RebarCardViewer item={selectedItem} />
+              </div>
+            )}
+          </section>
+        </section>
+      )}
+    </main>
+  );
+}
