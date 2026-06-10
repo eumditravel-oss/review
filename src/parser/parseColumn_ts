@@ -1,0 +1,37 @@
+import type { ColumnData } from "../types/rebar";
+
+export function parseColumn(ocrText: string): ColumnData {
+  const sizes = [...ocrText.matchAll(/\[(\d+(?:\.\d+)?)\]/g)].map((m) => m[1]);
+
+  const mainBar = ocrText.match(/H(\d+)\s*-\s*(\d+)\s*EA/);
+  const stirrupMatches = [...ocrText.matchAll(/H\d+\s*@\s*\d+/g)].map((m) =>
+    m[0].replace(/\s+/g, "")
+  );
+
+  return {
+    width: sizes[0] ?? "",
+    height: sizes[1] ?? "",
+    mainBar: {
+      diameter: mainBar ? `H${mainBar[1]}` : "",
+      count: mainBar ? `${mainBar[2]}EA` : ""
+    },
+    subMainBar: {
+      diameter: "",
+      count: ""
+    },
+    tieBar: {
+      topRatio: "0.168",
+      middleRatio: "0.666",
+      bottomRatio: "0.168",
+      top: stirrupMatches[0] ?? "",
+      middle: stirrupMatches[1] ?? "",
+      bottom: stirrupMatches[2] ?? ""
+    },
+    subTieBar: {
+      shape: "",
+      xCount: "",
+      yCount: "",
+      totalCount: ""
+    }
+  };
+}
