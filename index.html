@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF 배근자료 검토 시스템</title>
+  <link rel="stylesheet" href="./assets/css/style.css" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>PDF 배근자료 검토 시스템</h1>
+        <p>GitHub Pages에서 실행되는 브라우저 기반 PDF 검토 도구입니다.</p>
+      </div>
+
+      <div class="upload-box">
+        <input id="pdfFile" type="file" accept="application/pdf" />
+        <button id="analyzeBtn" type="button">분석 실행</button>
+      </div>
+    </header>
+
+    <section id="statusPanel" class="status-panel">
+      PDF를 업로드하면 분석 결과가 표시됩니다.
+    </section>
+
+    <section id="summaryPanel" class="summary-grid hidden">
+      <div class="summary-card wide">
+        <span>공사명</span>
+        <strong id="projectName">-</strong>
+      </div>
+      <div class="summary-card">
+        <span>파일명</span>
+        <strong id="sourceFile">-</strong>
+      </div>
+      <div class="summary-card">
+        <span>페이지</span>
+        <strong id="pageCount">-</strong>
+      </div>
+      <div class="summary-card">
+        <span>카드</span>
+        <strong id="itemCount">-</strong>
+      </div>
+    </section>
+
+    <main id="mainLayout" class="main-layout hidden">
+      <aside class="filter-panel">
+        <h2>필터</h2>
+
+        <label>
+          파트
+          <select id="partFilter">
+            <option value="전체">전체</option>
+          </select>
+        </label>
+
+        <label>
+          동명
+          <select id="dongFilter">
+            <option value="전체">전체</option>
+          </select>
+        </label>
+
+        <label>
+          상태
+          <select id="statusFilter">
+            <option value="전체">전체</option>
+            <option value="자동추출">자동추출</option>
+            <option value="확인필요">확인필요</option>
+            <option value="제외">제외</option>
+          </select>
+        </label>
+
+        <label>
+          부호 검색
+          <input id="keywordFilter" type="text" placeholder="예: MF1, SRC2, B1" />
+        </label>
+
+        <div class="download-buttons">
+          <button id="downloadJsonBtn" type="button">JSON 다운로드</button>
+          <button id="downloadCsvBtn" type="button">CSV 다운로드</button>
+        </div>
+      </aside>
+
+      <section class="review-panel">
+        <div class="table-toolbar">
+          <strong id="filteredCount">0건</strong>
+          <span>리스트에서 항목을 선택하면 원본 카드와 추출 데이터가 표시됩니다.</span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>상태</th>
+                <th>파트</th>
+                <th>동명</th>
+                <th>Page</th>
+                <th>Card</th>
+                <th>명칭</th>
+                <th>부호</th>
+                <th>주요 정보</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+          </table>
+        </div>
+
+        <section id="detailPanel" class="detail-panel hidden">
+          <div class="image-panel">
+            <h2>원본 카드 이미지</h2>
+            <img id="cardImage" alt="원본 카드 이미지" />
+          </div>
+
+          <div class="data-panel">
+            <h2 id="detailTitle">상세 정보</h2>
+            <dl id="detailData"></dl>
+            <h3>원본 텍스트</h3>
+            <pre id="rawText"></pre>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="./assets/js/app.js"></script>
+</body>
+</html>
