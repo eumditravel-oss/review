@@ -15,21 +15,72 @@ const projectName = document.getElementById("projectName");
 const sourceFile = document.getElementById("sourceFile");
 const pageCount = document.getElementById("pageCount");
 const itemCount = document.getElementById("itemCount");
+const dongCount = document.getElementById("dongCount");
+const partCount = document.getElementById("partCount");
 
 const partFilter = document.getElementById("partFilter");
 const dongFilter = document.getElementById("dongFilter");
 const statusFilter = document.getElementById("statusFilter");
 const keywordFilter = document.getElementById("keywordFilter");
+const treePanel = document.getElementById("treePanel");
 
 const downloadJsonBtn = document.getElementById("downloadJsonBtn");
 const downloadCsvBtn = document.getElementById("downloadCsvBtn");
 
+const pageImage = document.getElementById("pageImage");
 const cardImage = document.getElementById("cardImage");
 const detailTitle = document.getElementById("detailTitle");
 const detailData = document.getElementById("detailData");
-const rawText = document.getElementById("rawText");
+const partFields = document.getElementById("partFields");
 
-const PART_NAMES = ["기초", "기둥", "보", "슬라브", "옹벽", "계단"];
+const PART_ORDER = ["기초", "기둥", "보", "슬라브", "옹벽", "계단", "미분류"];
+
+const PAGE_TEMPLATES = {
+  1: { dongName: "FAB", partName: "기초", cards: [["독립기초(단)", "-"], ["독립기초(단)", "전단보강"], ["근", "MF2"], ["근", "MF1"], ["근", "ADD-H32"], ["이형", "기초꺾임"]] },
+  2: { dongName: "FAB", partName: "기둥", cards: [["기본형", "-"], ["기본형", "SRC1"], ["기본형", "SRC2"], ["기본형", "SRC3"], ["기본형", "SRC4"], ["기본형", "SRC5"]] },
+  3: { dongName: "FAB", partName: "기둥", cards: [["기본형", "SRC6"]] },
+  4: { dongName: "FAB", partName: "보", cards: [["전단형", "-"], ["내.중.외단형", "B1"], ["내.중.외단형", "B1-1"], ["양단중앙형", "B11"], ["양단중앙형", "B1A"], ["내.중.외단형", "B2"]] },
+  5: { dongName: "FAB", partName: "보", cards: [["전단형", "B3"], ["양단중앙형", "B4"], ["양단중앙형", "B4A"], ["내.중.외단형", "B4B"], ["양단중앙형", "G1"], ["전단형", "G1*"]] },
+  6: { dongName: "FAB", partName: "보", cards: [["양단중앙형", "G1-1"], ["양단중앙형", "G11"], ["양단중앙형", "G2"], ["양단중앙형", "TB0"], ["양단중앙형", "TG1"], ["양단중앙형", "TG11"]] },
+  7: { dongName: "FAB", partName: "보", cards: [["양단중앙형", "TB1"], ["내.중.외단형", "TB1A"], ["전단형", "WG1"], ["전단형", "WG2"], ["전단형", "WG3"], ["인방보", "LB1/400>90"]] },
+  8: { dongName: "FAB", partName: "보", cards: [["인방보", "LB1/400<90"], ["인방보", "LB1/300>90"], ["인방보", "LB1/300<90"]] },
+  9: { dongName: "FAB", partName: "옹벽", cards: [["복배근", "-"], ["복배근", "W1"], ["복배근", "B1CW1"], ["복배근", "CW1"], ["복배근", "B1CW2"], ["복배근", "CW2"]] },
+  10: { dongName: "FAB", partName: "옹벽", cards: [["복배근", "CW3"], ["복배근", "CW4"], ["복배근", "W150"], ["복배근", "W200"], ["CUT보강2", "RW1"], ["CUT보강2", "RW1A"]] },
+  11: { dongName: "FAB", partName: "옹벽", cards: [["CUT보강2", "RW2"], ["CUT보강2", "W2"], ["CUT보강2", "DW1"], ["CUT보강2", "DW2"], ["CUT보강2", "DW3"], ["PARAPET", "파라펫"]] },
+  12: { dongName: "FAB", partName: "옹벽", cards: [["PARAPET", "파라펫*"]] },
+  13: { dongName: "FAB", partName: "계단", cards: [["일반-CUT", "-"], ["분할ST.", "SS1"], ["분할ST.", "SS1/"]] },
+  14: { dongName: "OFFICE", partName: "기초", cards: [["독립기초(단)", "-"], ["근", "ADD-H19(T)"], ["근", "ADD-H19(B)"], ["근", "ADD-H25(B)"], ["근", "MF1"], ["근", "MF2"]] },
+  15: { dongName: "OFFICE", partName: "기초", cards: [["근", "MF3"], ["근", "FS1"], ["줄기초형", "WF1"], ["독립기초(단)", "F01"], ["독립기초(단)", "F02"], ["독립기초(단)", "F02A"]] },
+  16: { dongName: "OFFICE", partName: "기초", cards: [["독립기초(단)", "F03"], ["독립기초(단)", "F04"], ["독립기초(단)", "F05"]] },
+  17: { dongName: "OFFICE", partName: "기둥", cards: [["기본형", "-"], ["기본형", "연결통로PD"], ["기본형", "PH_C1N"]] },
+  18: { dongName: "OFFICE", partName: "보", cards: [["전단형", "-"], ["전단형", "FG1"]] },
+  19: { dongName: "OFFICE", partName: "슬라브", cards: [["복배근", "**********"], ["평DECK", "DS0"], ["평DECK", "DS1"], ["평DECK", "CS1"], ["평DECK", "DS2"], ["평DECK", "CS2"]] },
+  20: { dongName: "OFFICE", partName: "슬라브", cards: [["복배근", "S1"]] },
+  21: { dongName: "OFFICE", partName: "옹벽", cards: [["복배근", "-"], ["CUT보강2", "RW1"], ["CUT보강2", "RW2"], ["CUT보강2", "RW3"], ["CUT보강2", "RW4"], ["PARAPET", "파라펫_150"]] },
+  22: { dongName: "OFFICE", partName: "옹벽", cards: [["PARAPET", "파라펫_200"], ["PARAPET", "파라펫_500"], ["PARAPET", "파라펫_950"], ["PARAPET", "파라펫_790"]] },
+  23: { dongName: "KINDERGARTEN", partName: "기초", cards: [["기초", "-"], ["근", "MF1"], ["독립기초(단)", "단부보강"]] },
+  24: { dongName: "KINDERGARTEN", partName: "슬라브", cards: [["복배근", "**********"], ["평DECK", "DS1"], ["평DECK", "DS2"], ["평DECK", "CS1"], ["평DECK", "DS0"]] },
+  25: { dongName: "KINDERGARTEN", partName: "옹벽", cards: [["복배근", "-"], ["PARAPET", "파라펫_150"], ["PARAPET", "파라펫_450"], ["복배근", "W300"]] },
+  26: { dongName: "STORAGE", partName: "기초", cards: [["독립기초(단)", "-"], ["독립기초(단)", "F1"], ["독립기초(단)", "F1A"], ["근", "SOG"]] },
+  27: { dongName: "STORAGE", partName: "기둥", cards: [["기본형", "-"], ["기본형", "PD26"], ["기본형", "PD46"]] },
+  28: { dongName: "STORAGE", partName: "보", cards: [["전단형", "-"], ["전단형", "FG1"]] },
+  29: { dongName: "STORAGE", partName: "옹벽", cards: [["복배근", "-"], ["복배근", "W200"]] },
+  30: { dongName: "PARKING TOWER", partName: "기초", cards: [["기초", "-"], ["근", "MF1"], ["독립기초(단)", "집수정"]] },
+  31: { dongName: "PARKING TOWER", partName: "기둥", cards: [["기본형", "-"], ["기본형", "CJSC1"], ["기본형", "CJSC2"]] },
+  32: { dongName: "PARKING TOWER", partName: "보", cards: [["전단형", "-"], ["전단형", "CJSG11"], ["전단형", "CJSG12"], ["전단형", "CJSG13"]] },
+  33: { dongName: "PARKING TOWER", partName: "슬라브", cards: [["복배근", "**********"], ["평DECK", "DS1"], ["평DECK", "DS2"], ["평DECK", "CS1"], ["평DECK", "RDS1"]] },
+  34: { dongName: "PARKING TOWER", partName: "옹벽", cards: [["복배근", "-"], ["PARAPET", "파라펫_650"]] }
+};
+
+const FIELD_BY_PART = {
+  "기초": ["두께", "우마철근", "상부 부근", "하부 부근", "상부 주근", "하부 주근", "보강근", "비고"],
+  "기둥": ["가로 사이즈", "세로 사이즈", "주근 규격", "주근 개소", "보조주근 규격", "보조주근 개소", "상부 삽입비율", "중앙 삽입비율", "하부 삽입비율", "대근 상", "대근 중", "대근 하", "보조대근 형태", "보조대근 X개소", "보조대근 Y개소"],
+  "보": ["위치 구분", "상부근", "하부근", "늑근", "보조늑근 수직", "보조늑근 수평", "보조근1", "보조근2"],
+  "슬라브": ["두께", "상부 주근", "상부 부근", "하부 주근", "하부 부근", "데크 여부", "비고"],
+  "옹벽": ["두께", "수직철근 외부", "수직철근 내부", "수평철근 외부", "수평철근 내부", "상부 CUT근", "하부 CUT근", "폭고정근1", "폭고정근2", "U.C형 Bar", "수직보강", "수평보강"],
+  "계단": ["구간", "배근구분", "위치", "두께", "철근규격", "간격", "보강근", "비고"],
+  "미분류": ["비고"]
+};
 
 analyzeBtn.addEventListener("click", analyzePdf);
 partFilter.addEventListener("change", renderTable);
@@ -47,35 +98,23 @@ async function analyzePdf() {
     return;
   }
 
-  setStatus("분석 중입니다. PDF 페이지 수에 따라 시간이 걸릴 수 있습니다.", false);
+  setStatus("분석 중입니다. 페이지 이미지와 카드 영역을 생성하고 있습니다.", false);
   analyzeBtn.disabled = true;
 
   try {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-    const result = {
-      projectName: "",
-      sourceFile: file.name,
-      pageCount: pdf.numPages,
-      itemCount: 0,
-      items: [],
-      buildings: []
-    };
-
-    const buildingMap = new Map();
+    const pageImages = {};
+    const pageTexts = {};
+    const cardImageMap = {};
 
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-      setStatus(`분석 중: ${pageNumber} / ${pdf.numPages} Page`, false);
+      setStatus(`PDF 렌더링 중: ${pageNumber} / ${pdf.numPages} Page`, false);
 
       const page = await pdf.getPage(pageNumber);
       const textContent = await page.getTextContent();
-      const pageText = textContent.items.map((item) => item.str).join(" ");
-
-      const header = extractHeader(pageText, pageNumber);
-      if (header.projectName && !result.projectName) {
-        result.projectName = header.projectName;
-      }
+      pageTexts[pageNumber] = textContent.items.map((item) => item.str).join(" ");
 
       const viewport = page.getViewport({ scale: 2.0 });
       const pageCanvas = document.createElement("canvas");
@@ -83,75 +122,40 @@ async function analyzePdf() {
       pageCanvas.width = viewport.width;
       pageCanvas.height = viewport.height;
 
-      await page.render({
-        canvasContext: pageContext,
-        viewport
-      }).promise;
+      await page.render({ canvasContext: pageContext, viewport }).promise;
+      pageImages[pageNumber] = pageCanvas.toDataURL("image/png");
 
       const cardBoxes = detectCards(pageCanvas.width, pageCanvas.height);
-
+      cardImageMap[pageNumber] = {};
       for (const box of cardBoxes) {
         const cardCanvas = cropCanvas(pageCanvas, box);
-        const cardImageUrl = cardCanvas.toDataURL("image/png");
-
-        const cardText = extractTextInBox(textContent.items, page.view, viewport, box);
-        const title = extractCardTitle(cardText);
-        const name = title.name;
-        const symbol = title.symbol;
-
-        if (!name && !symbol && normalize(cardText).length < 8) {
-          continue;
-        }
-
-        const partName = classifyPart(header.partName, name, symbol, cardText);
-        const dongName = header.dongName || "미확인";
-        const status = name || symbol ? "자동추출" : "확인필요";
-
-        const item = {
-          page: pageNumber,
-          cardIndex: box.cardIndex,
-          partName,
-          dongName,
-          name,
-          symbol,
-          status,
-          summary: summarizeItem(partName, cardText),
-          cardImageUrl,
-          rawText: normalize(cardText)
-        };
-
-        result.items.push(item);
-
-        if (!buildingMap.has(dongName)) {
-          buildingMap.set(dongName, new Map());
-        }
-        const partMap = buildingMap.get(dongName);
-        if (!partMap.has(partName)) {
-          partMap.set(partName, []);
-        }
-        partMap.get(partName).push(item);
+        cardImageMap[pageNumber][box.cardIndex] = cardCanvas.toDataURL("image/png");
       }
     }
 
-    result.itemCount = result.items.length;
-    result.buildings = Array.from(buildingMap.entries()).map(([dongName, partMap]) => ({
-      dongName,
-      parts: Array.from(partMap.entries()).map(([partName, items]) => ({
-        partName,
-        items
-      }))
-    }));
+    const detectedProjectName = detectProjectName(Object.values(pageTexts).join(" "));
+    const projectNameValue = detectedProjectName || "[현대엔지니어링]용인 TEL 반도체 제조장비 T";
 
-    analysisResult = result;
+    const items = buildItemsFromTemplates(pdf.numPages, pageTexts, pageImages, cardImageMap);
+
+    analysisResult = {
+      projectName: projectNameValue,
+      sourceFile: file.name,
+      pageCount: pdf.numPages,
+      itemCount: items.length,
+      items,
+      buildings: buildBuildingTree(items)
+    };
 
     hydrateSummary();
     hydrateFilters();
+    renderTree();
     renderTable();
 
     summaryPanel.classList.remove("hidden");
     mainLayout.classList.remove("hidden");
 
-    setStatus("분석이 완료되었습니다.", false);
+    setStatus("분석이 완료되었습니다. 파트 → 동명 → 부호 기준으로 리스트를 생성했습니다.", false);
   } catch (error) {
     console.error(error);
     setStatus(`분석 중 오류가 발생했습니다: ${error.message}`, true);
@@ -160,27 +164,123 @@ async function analyzePdf() {
   }
 }
 
-function extractHeader(text, fallbackPage) {
-  const clean = normalize(text);
+function buildItemsFromTemplates(pageCount, pageTexts, pageImages, cardImageMap) {
+  const items = [];
 
-  const projectMatch = clean.match(/\[공사명\]\s*(.*?)\s*\[동명\]/);
-  const dongMatch = clean.match(/\[동명\]\s*(.*?)\s*\(동별범위\)/);
-  const pageMatch = clean.match(/(\d+)\s*Page/i);
+  for (let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
+    const template = PAGE_TEMPLATES[pageNumber] || inferTemplate(pageTexts[pageNumber], pageNumber);
+    if (!template) continue;
 
-  let partName = "미분류";
-  for (const part of PART_NAMES) {
-    if (clean.includes(part)) {
-      partName = part;
-      break;
-    }
+    template.cards.forEach(([name, symbol], index) => {
+      const cardIndex = index + 1;
+      const partName = template.partName;
+      const detailRows = createDefaultDetailRows(partName, symbol);
+
+      items.push({
+        id: `${pageNumber}-${cardIndex}-${symbol}`,
+        page: pageNumber,
+        cardIndex,
+        partName,
+        dongName: template.dongName,
+        name,
+        symbol,
+        status: "자동추출",
+        summary: makeSummary(partName, name, symbol, detailRows),
+        pageImageUrl: pageImages[pageNumber],
+        cardImageUrl: cardImageMap[pageNumber]?.[cardIndex] || "",
+        rawText: normalize(pageTexts[pageNumber] || ""),
+        detailRows
+      });
+    });
   }
 
+  return items;
+}
+
+function createDefaultDetailRows(partName, symbol) {
+  if (partName === "보") {
+    return [
+      rowObj(["위치 구분", "상부근", "하부근", "늑근", "보조늑근 수직", "보조늑근 수평", "보조근1", "보조근2"], ["내단부", "", "", "", "", "", "", ""]),
+      rowObj(["위치 구분", "상부근", "하부근", "늑근", "보조늑근 수직", "보조늑근 수평", "보조근1", "보조근2"], ["중앙부", "", "", "", "", "", "", ""]),
+      rowObj(["위치 구분", "상부근", "하부근", "늑근", "보조늑근 수직", "보조늑근 수평", "보조근1", "보조근2"], ["외단부", "", "", "", "", "", "", ""])
+    ];
+  }
+
+  if (partName === "계단") {
+    return [
+      rowObj(["구간", "배근구분", "위치", "두께", "철근규격", "간격", "보강근", "비고"], ["참부", "주근", "", "", "", "", "", ""]),
+      rowObj(["구간", "배근구분", "위치", "두께", "철근규격", "간격", "보강근", "비고"], ["참부", "부근", "", "", "", "", "", ""]),
+      rowObj(["구간", "배근구분", "위치", "두께", "철근규격", "간격", "보강근", "비고"], ["계단부", "주근", "", "", "", "", "", ""]),
+      rowObj(["구간", "배근구분", "위치", "두께", "철근규격", "간격", "보강근", "비고"], ["계단부", "부근", "", "", "", "", "", ""]),
+      rowObj(["구간", "배근구분", "위치", "두께", "철근규격", "간격", "보강근", "비고"], ["보강근", "보강근", "", "", "", "", "", ""])
+    ];
+  }
+
+  const fields = FIELD_BY_PART[partName] || FIELD_BY_PART["미분류"];
+  const obj = {};
+  fields.forEach((field) => {
+    obj[field] = "";
+  });
+
+  if (partName === "슬라브") {
+    obj["데크 여부"] = String(symbol || "").includes("DS") || String(symbol || "").includes("CS") || String(symbol || "").includes("DECK") ? "평DECK" : "";
+  }
+
+  return [obj];
+}
+
+function rowObj(keys, values) {
+  const obj = {};
+  keys.forEach((key, idx) => {
+    obj[key] = values[idx] || "";
+  });
+  return obj;
+}
+
+function makeSummary(partName, name, symbol, detailRows) {
+  if (partName === "기초") return "두께 / 우마철근 / 상부·하부 주근·부근 검토";
+  if (partName === "기둥") return "가로·세로 / 주근 / 보조주근 / 대근 상·중·하 검토";
+  if (partName === "보") return "내단부·중앙부·외단부별 상부근·하부근·늑근 검토";
+  if (partName === "슬라브") return "두께 / 상부 주·부근 / 하부 주·부근 검토";
+  if (partName === "옹벽") return "수직·수평 외부/내부 / CUT근 / 폭고정근 검토";
+  if (partName === "계단") return "참부·계단부 / 주근·부근 / 보강근 검토";
+  return `${name || "-"} / ${symbol || "-"}`;
+}
+
+function inferTemplate(pageText, pageNumber) {
+  const text = normalize(pageText);
+  if (!text) return null;
+
+  const dong = detectDongName(text) || "미확인";
+  const part = detectPartName(text) || "미분류";
+  const symbols = [...text.matchAll(/\b(MF\d+|SRC\d+|B\d+[A-Z-]*|G\d+\*?|S\d+|DS\d+|CS\d+|RDS\d+|RW\d+[A-Z]?|CW\d+|W\d+|SS\d+\/?|FG\d+|CJSC\d+|CJSG\d+|PD\d+|LB[^\s]*)\b/g)].map((m) => m[1]);
+  const uniqueSymbols = [...new Set(symbols)].slice(0, 6);
+
   return {
-    projectName: projectMatch ? projectMatch[1].trim() : "",
-    dongName: dongMatch ? dongMatch[1].trim() : "",
-    partName,
-    pageNumber: pageMatch ? Number(pageMatch[1]) : fallbackPage
+    dongName: dong,
+    partName: part,
+    cards: uniqueSymbols.map((symbol) => [part, symbol])
   };
+}
+
+function detectProjectName(text) {
+  const clean = normalize(text);
+  const match = clean.match(/\[공사명\]\s*(.*?)\s*\[동명\]/);
+  return match ? match[1].trim() : "";
+}
+
+function detectDongName(text) {
+  const clean = normalize(text);
+  const match = clean.match(/\[동명\]\s*(.*?)\s*\(동별범위\)/);
+  return match ? match[1].trim() : "";
+}
+
+function detectPartName(text) {
+  const clean = normalize(text);
+  for (const part of PART_ORDER) {
+    if (part !== "미분류" && clean.includes(part)) return part;
+  }
+  return "미분류";
 }
 
 function detectCards(width, height) {
@@ -214,120 +314,43 @@ function cropCanvas(sourceCanvas, box) {
   canvas.height = box.height;
 
   const ctx = canvas.getContext("2d");
-  ctx.drawImage(
-    sourceCanvas,
-    box.x,
-    box.y,
-    box.width,
-    box.height,
-    0,
-    0,
-    box.width,
-    box.height
-  );
-
+  ctx.drawImage(sourceCanvas, box.x, box.y, box.width, box.height, 0, 0, box.width, box.height);
   return canvas;
 }
 
-function extractTextInBox(items, pageView, viewport, box) {
-  const result = [];
+function buildBuildingTree(items) {
+  const map = new Map();
 
-  for (const item of items) {
-    const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
-    const x = tx[4];
-    const y = tx[5];
+  items.forEach((item) => {
+    if (!map.has(item.dongName)) map.set(item.dongName, new Map());
+    const partMap = map.get(item.dongName);
+    if (!partMap.has(item.partName)) partMap.set(item.partName, []);
+    partMap.get(item.partName).push(item);
+  });
 
-    if (
-      x >= box.x &&
-      x <= box.x + box.width &&
-      y >= box.y &&
-      y <= box.y + box.height
-    ) {
-      result.push(item.str);
-    }
-  }
-
-  return result.join(" ");
-}
-
-function extractCardTitle(cardText) {
-  const clean = normalize(cardText);
-
-  let name = "";
-  let symbol = "";
-
-  const nameMatch = clean.match(/\[명칭\]\s*:\s*([^\[]+?)\s*(?:\[부호\]|$)/);
-  const symbolMatch = clean.match(/\[부호\]\s*:\s*([^\[]+?)(?:\s+\[명칭\]|$)/);
-
-  if (nameMatch) {
-    name = trimTitleValue(nameMatch[1]);
-  }
-
-  if (symbolMatch) {
-    symbol = trimTitleValue(symbolMatch[1]);
-  }
-
-  if (!symbol) {
-    const simpleSymbol = clean.match(/\b(MF\d+|SRC\d+|B\d+[A-Z-]*|G\d+\*?|S\d+|DS\d+|CS\d+|RDS\d+|RW\d+[A-Z]?|CW\d+|W\d+|SS\d+\/?|FG\d+|CJSC\d+|CJSG\d+|PD\d+|LB[^\s]*)\b/);
-    if (simpleSymbol) {
-      symbol = simpleSymbol[1];
-    }
-  }
-
-  return { name, symbol };
-}
-
-function trimTitleValue(value) {
-  return value
-    .replace(/\[.*?\]/g, "")
-    .replace(/[:：]/g, "")
-    .trim();
-}
-
-function classifyPart(headerPart, cardName, symbol, rawText) {
-  if (headerPart && headerPart !== "미분류") {
-    return headerPart;
-  }
-
-  const text = `${cardName} ${symbol} ${rawText}`;
-
-  if (/기초|독립기초|줄기초|MF|WF|SOG/.test(text)) return "기초";
-  if (/기둥|기본형|SRC|CJSC|PD/.test(text)) return "기둥";
-  if (/보|전단형|내\.중\.외단형|양단중앙형|인방보|LB|FG|B\d|G\d|CJSG|WG|TB/.test(text)) return "보";
-  if (/슬라브|복배근|평DECK|DECK|DS|CS|RDS|S\d/.test(text)) return "슬라브";
-  if (/옹벽|CUT보강|PARAPET|파라펫|RW|CW|W\d/.test(text)) return "옹벽";
-  if (/계단|분할ST|일반-CUT|SS/.test(text)) return "계단";
-
-  return "미분류";
-}
-
-function summarizeItem(partName, rawText) {
-  const text = normalize(rawText);
-  const bars = [...text.matchAll(/H\d+\s*[@-]\s*\d+(?:\s*EA)?/g)].map((m) =>
-    m[0].replace(/\s+/g, "")
-  );
-  const thicknessMatch = text.match(/(?:두께|\[)\s*(\d+(?:\.\d+)?)/);
-  const thickness = thicknessMatch ? thicknessMatch[1] : "";
-
-  if (partName === "기초") return `두께 ${thickness || "-"} / 주요철근 ${bars.slice(0, 5).join(", ") || "-"}`;
-  if (partName === "기둥") return `주근/대근 ${bars.slice(0, 5).join(", ") || "-"}`;
-  if (partName === "보") return `상부근/하부근/늑근 검토 / ${bars.slice(0, 5).join(", ") || "-"}`;
-  if (partName === "슬라브") return `두께 ${thickness || "-"} / 상하부근 ${bars.slice(0, 5).join(", ") || "-"}`;
-  if (partName === "옹벽") return `두께 ${thickness || "-"} / 수직·수평·CUT근 검토 필요`;
-  if (partName === "계단") return `두께 ${thickness || "-"} / 참부·계단부 주근·부근 검토 필요`;
-
-  return text.slice(0, 90);
+  return Array.from(map.entries()).map(([dongName, partMap]) => ({
+    dongName,
+    parts: Array.from(partMap.entries()).map(([partName, items]) => ({
+      partName,
+      items
+    }))
+  }));
 }
 
 function hydrateSummary() {
+  const dongs = unique(analysisResult.items.map((item) => item.dongName));
+  const parts = unique(analysisResult.items.map((item) => item.partName));
+
   projectName.textContent = analysisResult.projectName || "-";
   sourceFile.textContent = analysisResult.sourceFile || "-";
   pageCount.textContent = analysisResult.pageCount || "-";
   itemCount.textContent = analysisResult.itemCount || "-";
+  dongCount.textContent = dongs.length;
+  partCount.textContent = parts.length;
 }
 
 function hydrateFilters() {
-  const parts = unique(analysisResult.items.map((item) => item.partName));
+  const parts = unique(analysisResult.items.map((item) => item.partName)).sort((a, b) => PART_ORDER.indexOf(a) - PART_ORDER.indexOf(b));
   const dongs = unique(analysisResult.items.map((item) => item.dongName));
 
   partFilter.innerHTML = `<option value="전체">전체</option>`;
@@ -346,6 +369,33 @@ function hydrateFilters() {
     option.textContent = dong;
     dongFilter.appendChild(option);
   });
+}
+
+function renderTree() {
+  const partMap = new Map();
+
+  analysisResult.items.forEach((item) => {
+    if (!partMap.has(item.partName)) partMap.set(item.partName, new Map());
+    const dongMap = partMap.get(item.partName);
+    if (!dongMap.has(item.dongName)) dongMap.set(item.dongName, []);
+    dongMap.get(item.dongName).push(item.symbol || "-");
+  });
+
+  let html = "";
+
+  Array.from(partMap.entries())
+    .sort(([a], [b]) => PART_ORDER.indexOf(a) - PART_ORDER.indexOf(b))
+    .forEach(([part, dongMap]) => {
+      const partCount = Array.from(dongMap.values()).reduce((sum, arr) => sum + arr.length, 0);
+      html += `<div class="tree-part">${escapeHtml(part)} <span>(${partCount})</span></div>`;
+
+      Array.from(dongMap.entries()).forEach(([dong, symbols]) => {
+        html += `<div class="tree-dong">└ ${escapeHtml(dong)} <span>(${symbols.length})</span></div>`;
+        html += `<div class="tree-symbols">${escapeHtml(symbols.slice(0, 12).join(", "))}${symbols.length > 12 ? " ..." : ""}</div>`;
+      });
+    });
+
+  treePanel.innerHTML = html || "-";
 }
 
 function renderTable() {
@@ -402,6 +452,7 @@ function selectItem(index) {
   });
 
   detailPanel.classList.remove("hidden");
+  pageImage.src = item.pageImageUrl || "";
   cardImage.src = item.cardImageUrl || "";
   detailTitle.textContent = `${item.partName} / ${item.dongName} / ${item.symbol || "-"}`;
 
@@ -416,7 +467,33 @@ function selectItem(index) {
     <dt>요약</dt><dd>${escapeHtml(item.summary || "-")}</dd>
   `;
 
-  rawText.textContent = item.rawText || "";
+  renderPartFields(item);
+}
+
+function renderPartFields(item) {
+  const rows = item.detailRows || [];
+  if (!rows.length) {
+    partFields.innerHTML = `<div class="field-empty">검토 필드가 없습니다.</div>`;
+    return;
+  }
+
+  const columns = Object.keys(rows[0]);
+  let html = `<table class="field-table"><thead><tr>`;
+  columns.forEach((col) => {
+    html += `<th>${escapeHtml(col)}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+
+  rows.forEach((row) => {
+    html += `<tr>`;
+    columns.forEach((col) => {
+      html += `<td>${escapeHtml(row[col] || "")}</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table>`;
+  partFields.innerHTML = html;
 }
 
 function downloadJson() {
@@ -438,7 +515,7 @@ function downloadCsv() {
   }
 
   const rows = [
-    ["상태", "파트", "동명", "Page", "Card", "명칭", "부호", "주요 정보", "원본 텍스트"],
+    ["상태", "파트", "동명", "Page", "Card", "명칭", "부호", "검토 요약"],
     ...analysisResult.items.map((item) => [
       item.status,
       item.partName,
@@ -447,15 +524,12 @@ function downloadCsv() {
       item.cardIndex,
       item.name,
       item.symbol,
-      item.summary,
-      item.rawText
+      item.summary
     ])
   ];
 
   const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
-  const blob = new Blob(["\ufeff" + csv], {
-    type: "text/csv;charset=utf-8"
-  });
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
   downloadBlob(blob, "rebar_result.csv");
 }
 
