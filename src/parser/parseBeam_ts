@@ -1,0 +1,38 @@
+import type { BeamData } from "../types/rebar";
+
+export function parseBeam(ocrText: string): BeamData {
+  return {
+    rows: [
+      {
+        zone: "내단부",
+        topBar: "",
+        bottomBar: "",
+        stirrup: "",
+        subStirrupVertical: "",
+        subStirrupHorizontal: "",
+        subBar1: "",
+        subBar2: ""
+      },
+      {
+        zone: "중앙부",
+        topBar: "",
+        bottomBar: "",
+        stirrup: "",
+        subStirrupVertical: "",
+        subStirrupHorizontal: "",
+        subBar1: "",
+        subBar2: ""
+      },
+      {
+        zone: "외단부",
+        topBar: "",
+        bottomBar: "",
+        stirrup: "",
+        subStirrupVertical: "",
+        subStirrupHorizontal: "",
+        subBar1: "",
+        subBar2: ""
+      }
+    ]
+  };
+}
