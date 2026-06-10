@@ -6,7 +6,6 @@ const state = {
   pdfDoc: null,
   pdfFileName: "",
   pageImages: new Map(),
-  pageViewports: new Map(),
   results: [],
   selectedIndex: -1,
   apiModel: "",
@@ -14,7 +13,6 @@ const state = {
 };
 
 const $ = (id) => document.getElementById(id);
-
 const partOrder = ["기초", "기둥", "보", "슬라브", "옹벽", "계단"];
 
 function setProgress(text) {
@@ -54,34 +52,6 @@ function toCsv(rows) {
   ].join("\n");
 }
 
-function flattenResults() {
-  const rows = [];
-  for (const item of state.results) {
-    const extracted = Array.isArray(item.extracted) ? item.extracted : [];
-    if (!extracted.length) {
-      rows.push(baseRow(item));
-      continue;
-    }
-    for (const row of extracted) {
-      rows.push({ ...baseRow(item), ...row });
-    }
-  }
-  return rows;
-}
-
-function baseRow(item) {
-  return {
-    상태: item.status,
-    파트: item.partName,
-    동명: item.dongName,
-    Page: item.pageNo,
-    Card: item.cardIndex,
-    명칭: item.name,
-    부호: item.symbol,
-    요약: item.summary,
-  };
-}
-
 function parsePages(text, pageCount) {
   const value = (text || "").trim();
   if (!value) return [];
@@ -103,28 +73,36 @@ function parsePages(text, pageCount) {
 }
 
 function fieldSchema(partName) {
-  if (partName === "기초") return { "두께": "", "우마철근": "", "상부 부근": "", "하부 부근": "", "상부 주근": "", "하부 주근": "", "보강근": "" };
-  if (partName === "기둥") return { "가로 사이즈": "", "세로 사이즈": "", "주근 규격": "", "주근 개소": "", "보조주근 규격": "", "보조주근 개소": "", "상부 삽입비율": "", "중앙 삽입비율": "", "하부 삽입비율": "", "대근 상": "", "대근 중": "", "대근 하": "", "보조대근 형태": "", "보조대근 X개소": "", "보조대근 Y개소": "", "보조대근 총개소": "" };
-  if (partName === "슬라브") return { "두께": "", "상부 주근": "", "상부 부근": "", "하부 주근": "", "하부 부근": "", "데크 여부": "" };
-  if (partName === "옹벽") return { "두께": "", "수직철근 외부": "", "수직철근 내부": "", "수평철근 외부": "", "수평철근 내부": "", "상부 CUT근": "", "하부 CUT근": "", "폭고정근1": "", "폭고정근2": "", "U.C형 Bar": "", "수직보강": "", "수평보강": "" };
+  if (partName === "기초") {
+    return { "두께": "", "우마철근": "", "상부 부근": "", "하부 부근": "", "상부 주근": "", "하부 주근": "", "보강근": "", "비고": "" };
+  }
+  if (partName === "기둥") {
+    return { "가로 사이즈": "", "세로 사이즈": "", "주근 규격": "", "주근 개소": "", "보조주근 규격": "", "보조주근 개소": "", "상부 삽입비율": "", "중앙 삽입비율": "", "하부 삽입비율": "", "대근 상": "", "대근 중": "", "대근 하": "", "보조대근 형태": "", "보조대근 X개소": "", "보조대근 Y개소": "", "보조대근 총개소": "", "비고": "" };
+  }
+  if (partName === "슬라브") {
+    return { "두께": "", "상부 주근": "", "상부 부근": "", "하부 주근": "", "하부 부근": "", "데크 여부": "", "비고": "" };
+  }
+  if (partName === "옹벽") {
+    return { "두께": "", "수직철근 외부": "", "수직철근 내부": "", "수평철근 외부": "", "수평철근 내부": "", "상부 CUT근": "", "하부 CUT근": "", "폭고정근": "", "폭고정근1": "", "폭고정근2": "", "수직보강": "", "수평보강": "", "비고": "" };
+  }
   return { "비고": "" };
 }
 
 function rowsSchema(partName) {
   if (partName === "보") {
     return [
-      { "위치 구분": "내단부", "상부근": "", "하부근": "", "늑근": "", "보조늑근 수직": "", "보조늑근 수평": "", "보조근1": "", "보조근2": "" },
-      { "위치 구분": "중앙부", "상부근": "", "하부근": "", "늑근": "", "보조늑근 수직": "", "보조늑근 수평": "", "보조근1": "", "보조근2": "" },
-      { "위치 구분": "외단부", "상부근": "", "하부근": "", "늑근": "", "보조늑근 수직": "", "보조늑근 수평": "", "보조근1": "", "보조근2": "" },
+      { "위치 구분": "내단부", "상부근": "", "하부근": "", "늑근": "", "보조늑근": "", "보조늑근 수직": "", "보조늑근 수평": "", "보조근1": "", "보조근2": "", "비고": "" },
+      { "위치 구분": "중앙부", "상부근": "", "하부근": "", "늑근": "", "보조늑근": "", "보조늑근 수직": "", "보조늑근 수평": "", "보조근1": "", "보조근2": "", "비고": "" },
+      { "위치 구분": "외단부", "상부근": "", "하부근": "", "늑근": "", "보조늑근": "", "보조늑근 수직": "", "보조늑근 수평": "", "보조근1": "", "보조근2": "", "비고": "" },
     ];
   }
   if (partName === "계단") {
     return [
-      { "구간": "참부", "배근구분": "주근", "위치": "", "두께": "", "철근규격": "", "간격": "", "보강근": "" },
-      { "구간": "참부", "배근구분": "부근", "위치": "", "두께": "", "철근규격": "", "간격": "", "보강근": "" },
-      { "구간": "계단부", "배근구분": "주근", "위치": "", "두께": "", "철근규격": "", "간격": "", "보강근": "" },
-      { "구간": "계단부", "배근구분": "부근", "위치": "", "두께": "", "철근규격": "", "간격": "", "보강근": "" },
-      { "구간": "보강근", "배근구분": "보강근", "위치": "", "두께": "", "철근규격": "", "간격": "", "보강근": "" },
+      { "구간": "참부", "배근구분": "주근", "두께": "", "철근규격": "", "간격": "", "보강근": "", "비고": "" },
+      { "구간": "참부", "배근구분": "부근", "두께": "", "철근규격": "", "간격": "", "보강근": "", "비고": "" },
+      { "구간": "계단부", "배근구분": "주근", "두께": "", "철근규격": "", "간격": "", "보강근": "", "비고": "" },
+      { "구간": "계단부", "배근구분": "부근", "두께": "", "철근규격": "", "간격": "", "보강근": "", "비고": "" },
+      { "구간": "보강근", "배근구분": "보강근", "두께": "", "철근규격": "", "간격": "", "보강근": "", "비고": "" },
     ];
   }
   return [];
@@ -133,41 +111,87 @@ function rowsSchema(partName) {
 function buildPrompt(pageNo, dongName, partName, expectedCards) {
   const expected = expectedCards.map((c, i) => `${i + 1}. 명칭=${c[0]}, 부호=${c[1]}`).join("\n");
   return `
-너는 건축 구조 배근자료 PDF 페이지 분석 엔진이다.
-이미지 1장은 배근 카드가 3열 x 2행 또는 일부 빈칸 구조로 배치된 PDF 페이지이다.
-고정 좌표로 자르지 말고, 이미지 전체를 보고 실제 카드 테두리와 카드 제목 위치를 찾아라.
+너는 고려전산/구조 배근자료 PDF를 읽는 데이터 추출 엔진이다.
+이미지 크롭 좌표를 반환하지 말고, PDF 페이지 이미지에서 보이는 배근 내용을 직접 읽어 구조화된 JSON만 반환한다.
 
-페이지 정보:
+분류 원칙:
+1. 최상위 분류는 파트이다. 파트 예: 기초, 기둥, 보, 슬라브, 옹벽, 계단.
+2. 그 다음 분류는 동명이다. 예: FAB, FAB(지하), OFFICE, KINDERGARTEN, STORAGE, PARKING TOWER.
+3. 그 다음 기준은 [부호] 우측 명칭/부호이다.
+4. 결과는 반드시 파트 → 동명 → 명칭/부호 순서로 리스트화한다.
+
+현재 페이지 정보:
 - Page: ${pageNo}
-- 동명: ${dongName}
 - 파트: ${partName}
+- 동명: ${dongName}
 
-기대 카드 목록:
+이 페이지에서 기대되는 카드:
 ${expected}
 
-작업:
-1. 페이지 전체 이미지에서 유효 카드만 찾는다. 빈 카드 제외.
-2. 카드별 bbox를 이미지 픽셀 기준 [x1,y1,x2,y2]로 반환한다.
-3. 각 카드 안의 철근값을 읽어 fields 또는 rows에 입력한다.
-4. card_index는 왼쪽 위부터 오른쪽 1,2,3 / 아래 4,5,6이다.
-5. H16 [4]는 H16-4EA, H10 @ 200은 H10@200, H29 @ 200은 H29@200으로 통일한다.
-6. 값이 없거나 '-'이면 빈 문자열로 둔다.
-7. 반드시 JSON object만 반환한다.
+파트별 추출 규칙:
 
-fields 기본 형식:
-${JSON.stringify(fieldSchema(partName), null, 2)}
+[기초]
+- [부호] 우측 명칭을 기준으로 1개 항목 생성.
+- H25@2000 또는 2000으로 표기되는 우측 상단 값은 우마철근.
+- H29@200처럼 반복되는 우측 철근값은 위에서 아래 순서대로 상부 부근, 하부 부근, 상부 주근, 하부 주근.
+- 1.4, 1.5 등은 기초 두께.
+- fields 형식: ${JSON.stringify(fieldSchema("기초"))}
 
-rows 기본 형식:
-${JSON.stringify(rowsSchema(partName), null, 2)}
+[기둥]
+- [부호] 우측 명칭을 기준으로 1개 항목 생성.
+- 0.8, 0.8 등은 가로 사이즈, 세로 사이즈.
+- H25-12EA는 주근 규격/주근 개소.
+- H13-4EA는 보조주근 규격/보조주근 개소.
+- 층높이 0.168, 0.666, 0.168은 상부/중앙/하부 삽입비율.
+- 우측 대근 상/중/하 간격을 추출.
+- 보조대근은 형태, X개소, Y개소, 총개소를 추출.
+- fields 형식: ${JSON.stringify(fieldSchema("기둥"))}
 
-반환:
+[보]
+- 부호와 명칭을 기준으로 생성.
+- 상부근, 하부근, 늑근, 보조늑근, 보조근을 모두 리스트화.
+- 내단부, 중앙부, 외단부가 있으면 행을 분리.
+- H16 [4]는 H16-4EA로 정규화.
+- rows 형식: ${JSON.stringify(rowsSchema("보"))}
+
+[슬라브]
+- 두께, 상부 주근, 상부 부근, 하부 주근, 하부 부근을 추출.
+- fields 형식: ${JSON.stringify(fieldSchema("슬라브"))}
+
+[옹벽]
+- 두께를 추출.
+- 수직방향 실선/파선은 수직철근 외부/내부.
+- 중간에 끊어진 선은 상부 CUT근/하부 CUT근.
+- 수평철근도 외부/내부를 구분.
+- 폭고정근을 추출.
+- fields 형식: ${JSON.stringify(fieldSchema("옹벽"))}
+
+[계단]
+- 두께 0.15 등 추출.
+- 보강근을 리스트화.
+- 빨간색/파란색 영역은 참부.
+- 노란색 영역은 계단부.
+- 선으로 표기된 배근은 부근.
+- 점으로 표기된 배근은 주근.
+- rows 형식: ${JSON.stringify(rowsSchema("계단"))}
+
+공통 정규화:
+- H10 @ 200 → H10@200
+- H29 @ 200 → H29@200
+- H16 [4] → H16-4EA
+- H25 - 12EA → H25-12EA
+- 값이 없거나 '-'이면 빈 문자열.
+- 추측하지 말고 보이는 값만 입력.
+
+반환 형식:
 {
-  "cards": [
+  "page": ${pageNo},
+  "dong_name": "${dongName}",
+  "part_name": "${partName}",
+  "items": [
     {
-      "card_index": 1,
       "name": "",
       "symbol": "",
-      "bbox": [0,0,0,0],
       "fields": {},
       "rows": [],
       "confidence": 0.0,
@@ -175,6 +199,8 @@ ${JSON.stringify(rowsSchema(partName), null, 2)}
     }
   ]
 }
+
+JSON 외 다른 설명은 쓰지 마라.
 `;
 }
 
@@ -226,15 +252,13 @@ async function loadPdf(file) {
   state.pdfDoc = await pdfjsLib.getDocument({ data: buffer }).promise;
   state.pdfFileName = file.name;
   state.pageImages.clear();
-  state.pageViewports.clear();
   $("pdfInfo").textContent = `${file.name} / ${state.pdfDoc.numPages} pages`;
   $("summaryPages").textContent = state.pdfDoc.numPages;
   $("summaryProject").textContent = $("projectName").value || file.name;
 }
 
-async function renderPageImage(pageNo, scale = 3) {
+async function renderPageImage(pageNo, scale = 2.2) {
   if (state.pageImages.has(pageNo)) return state.pageImages.get(pageNo);
-
   const page = await state.pdfDoc.getPage(pageNo);
   const viewport = page.getViewport({ scale });
   const canvas = document.createElement("canvas");
@@ -242,11 +266,10 @@ async function renderPageImage(pageNo, scale = 3) {
   canvas.height = Math.floor(viewport.height);
   const ctx = canvas.getContext("2d");
   await page.render({ canvasContext: ctx, viewport }).promise;
-
   const dataUrl = canvas.toDataURL("image/png");
-  state.pageImages.set(pageNo, { dataUrl, width: canvas.width, height: canvas.height });
-  state.pageViewports.set(pageNo, viewport);
-  return state.pageImages.get(pageNo);
+  const image = { dataUrl, width: canvas.width, height: canvas.height };
+  state.pageImages.set(pageNo, image);
+  return image;
 }
 
 function dataUrlToBase64(dataUrl) {
@@ -256,11 +279,10 @@ function dataUrlToBase64(dataUrl) {
 async function analyzePage(pageNo, apiKey, model) {
   const template = window.PAGE_TEMPLATES[pageNo];
   if (!template) return [];
-
   const [dongName, partName, expectedCards] = template;
   if (!expectedCards.length) return [];
 
-  const image = await renderPageImage(pageNo, 3);
+  const image = await renderPageImage(pageNo);
   const prompt = buildPrompt(pageNo, dongName, partName, expectedCards);
 
   const body = {
@@ -278,60 +300,58 @@ async function analyzePage(pageNo, apiKey, model) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(await res.text());
+
+  if (!res.ok) {
+    const text = await res.text();
+    let retry = "";
+    try {
+      const data = JSON.parse(text);
+      const delay = data?.error?.details?.find(d => d.retryDelay)?.retryDelay;
+      if (delay) retry = `\n재시도 가능 시간: ${delay}`;
+    } catch {}
+    throw new Error(`${text}${retry}`);
+  }
 
   const data = await res.json();
   const raw = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
   state.rawByPage.set(pageNo, raw);
 
-  let parsed = JSON.parse(raw);
-  const apiCards = Array.isArray(parsed.cards) ? parsed.cards : [];
+  const parsed = JSON.parse(raw);
+  const items = Array.isArray(parsed.items) ? parsed.items : [];
 
-  return expectedCards.map((expected, idx) => {
-    const cardIndex = idx + 1;
-    const apiCard = matchCard(apiCards, cardIndex, expected[0], expected[1]);
-    const extracted = cardToRows(apiCard, partName);
-    const summary = summarize(extracted);
-
+  return items.map((item, idx) => {
+    const rows = normalizeRows(item, partName);
     return {
-      status: apiCard ? "PageAPI완료" : "PageAPI확인필요",
+      status: "추출완료",
       pageNo,
-      cardIndex,
       partName,
       dongName,
-      name: apiCard?.name || expected[0],
-      symbol: apiCard?.symbol || expected[1],
-      bbox: apiCard?.bbox || null,
-      extracted,
-      summary,
-      confidence: apiCard?.confidence || 0,
+      name: item.name || expectedCards[idx]?.[0] || "",
+      symbol: item.symbol || expectedCards[idx]?.[1] || "",
+      extracted: rows,
+      summary: summarize(rows),
+      confidence: item.confidence || 0,
+      note: item.note || "",
       raw,
     };
   });
 }
 
-function matchCard(cards, index, name, symbol) {
-  return cards.find(c => Number(c.card_index) === index)
-    || cards.find(c => String(c.symbol || "").trim() === String(symbol || "").trim())
-    || cards.find(c => String(c.name || "").trim() === String(name || "").trim())
-    || null;
-}
-
-function cardToRows(card, partName) {
-  if (!card) return [];
-  if (Array.isArray(card.rows) && card.rows.length) return card.rows;
-  if (card.fields && typeof card.fields === "object") return [card.fields];
-  return [];
+function normalizeRows(item, partName) {
+  if (Array.isArray(item.rows) && item.rows.length) return item.rows;
+  if (item.fields && typeof item.fields === "object" && Object.keys(item.fields).length) return [item.fields];
+  if (partName === "보" || partName === "계단") return rowsSchema(partName);
+  return [fieldSchema(partName)];
 }
 
 function summarize(rows) {
   const vals = [];
   for (const row of rows || []) {
     for (const [k, v] of Object.entries(row)) {
-      if (v && !["위치 구분", "구간", "배근구분"].includes(k)) vals.push(`${k}:${v}`);
+      if (v && !["위치 구분", "구간", "배근구분", "비고"].includes(k)) vals.push(`${k}:${v}`);
     }
   }
-  return vals.slice(0, 4).join(" / ");
+  return vals.slice(0, 5).join(" / ");
 }
 
 async function analyze() {
@@ -356,15 +376,24 @@ async function analyze() {
   if (!pages.length) return alert("분석할 페이지가 없습니다.");
 
   for (const pageNo of pages) {
-    setProgress(`${pageNo}/${state.pdfDoc.numPages} 페이지 분석 중`);
+    setProgress(`${pageNo}/${state.pdfDoc.numPages} 페이지 내용 추출 중`);
     try {
       const pageResults = await analyzePage(pageNo, apiKey, model);
       state.results = state.results.filter(r => r.pageNo !== pageNo).concat(pageResults);
-      state.results.sort((a, b) => a.pageNo - b.pageNo || a.cardIndex - b.cardIndex);
+      state.results.sort((a, b) =>
+        partOrder.indexOf(a.partName) - partOrder.indexOf(b.partName)
+        || String(a.dongName).localeCompare(String(b.dongName))
+        || a.pageNo - b.pageNo
+      );
       renderAll();
     } catch (err) {
       console.error(err);
-      alert(`${pageNo}페이지 분석 오류:\n${err.message.slice(0, 1000)}`);
+      const msg = err.message || "";
+      alert(`${pageNo}페이지 분석 오류:\n${msg.slice(0, 1200)}`);
+      if (msg.includes("429") || msg.includes("quota")) {
+        setProgress("API 할당량 초과로 중단됨. 지정 페이지를 줄이거나 다음 리셋 후 이어서 분석하세요.");
+        break;
+      }
     }
   }
 
@@ -373,9 +402,37 @@ async function analyze() {
 
 async function reAnalyzeSelected() {
   const item = state.results[state.selectedIndex];
-  if (!item) return alert("재분석할 카드를 선택하세요.");
+  if (!item) return alert("재분석할 항목을 선택하세요.");
   $("rangeSelect").value = "current";
   await analyze();
+}
+
+function flattenResults() {
+  const rows = [];
+  for (const item of state.results) {
+    const extracted = Array.isArray(item.extracted) ? item.extracted : [];
+    if (!extracted.length) {
+      rows.push(baseRow(item));
+      continue;
+    }
+    for (const row of extracted) {
+      rows.push({ ...baseRow(item), ...row });
+    }
+  }
+  return rows;
+}
+
+function baseRow(item) {
+  return {
+    상태: item.status,
+    파트: item.partName,
+    동명: item.dongName,
+    Page: item.pageNo,
+    명칭: item.name,
+    부호: item.symbol,
+    요약: item.summary,
+    비고: item.note || "",
+  };
 }
 
 function renderAll() {
@@ -401,11 +458,11 @@ function hydrateFilters() {
 function filteredResults() {
   const part = $("partFilter").value;
   const dong = $("dongFilter").value;
-  const symbol = $("symbolFilter").value.trim().toLowerCase();
+  const keyword = $("symbolFilter").value.trim().toLowerCase();
   return state.results.filter(r => {
     if (part && r.partName !== part) return false;
     if (dong && r.dongName !== dong) return false;
-    if (symbol && !String(r.symbol || "").toLowerCase().includes(symbol)) return false;
+    if (keyword && !`${r.symbol} ${r.name}`.toLowerCase().includes(keyword)) return false;
     return true;
   });
 }
@@ -417,7 +474,7 @@ function renderResultTable() {
     const realIndex = state.results.indexOf(r);
     return `<tr data-index="${realIndex}" class="${realIndex === state.selectedIndex ? "selected" : ""}">
       <td>${r.status}</td><td>${r.partName}</td><td>${r.dongName}</td>
-      <td>${r.pageNo}</td><td>${r.cardIndex}</td><td>${r.name}</td><td>${r.symbol}</td><td>${r.summary}</td>
+      <td>${r.pageNo}</td><td>${r.name}</td><td>${r.symbol}</td><td>${r.summary}</td>
     </tr>`;
   }).join("");
 
@@ -451,40 +508,17 @@ function renderDetail() {
   ).join("");
 
   $("apiRaw").textContent = item.raw || "";
-
-  drawPageAndCrop(item);
+  drawPage(item.pageNo);
 }
 
-async function drawPageAndCrop(item) {
-  const image = await renderPageImage(item.pageNo, 3);
-
-  const pageCanvas = $("pageCanvas");
-  const pageCtx = pageCanvas.getContext("2d");
+async function drawPage(pageNo) {
+  const image = await renderPageImage(pageNo);
+  const canvas = $("pageCanvas");
+  const ctx = canvas.getContext("2d");
   const img = await loadImage(image.dataUrl);
-  pageCanvas.width = img.width;
-  pageCanvas.height = img.height;
-  pageCtx.drawImage(img, 0, 0);
-
-  if (item.bbox) {
-    const [x1, y1, x2, y2] = item.bbox.map(Number);
-    pageCtx.strokeStyle = "#2563eb";
-    pageCtx.lineWidth = 8;
-    pageCtx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-
-    const cropCanvas = $("cropCanvas");
-    const cropCtx = cropCanvas.getContext("2d");
-    const pad = 16;
-    const sx = Math.max(0, x1 - pad);
-    const sy = Math.max(0, y1 - pad);
-    const sw = Math.min(img.width - sx, x2 - x1 + pad * 2);
-    const sh = Math.min(img.height - sy, y2 - y1 + pad * 2);
-    cropCanvas.width = sw;
-    cropCanvas.height = sh;
-    cropCtx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
-  } else {
-    $("cropCanvas").width = 1;
-    $("cropCanvas").height = 1;
-  }
+  canvas.width = img.width;
+  canvas.height = img.height;
+  ctx.drawImage(img, 0, 0);
 }
 
 function loadImage(src) {
@@ -504,13 +538,13 @@ function saveProject() {
     results: state.results,
     savedAt: new Date().toISOString(),
   };
-  localStorage.setItem("rebarProject", JSON.stringify(data));
-  alert("브라우저에 프로젝트 결과를 저장했습니다. PDF 원본은 저장되지 않습니다.");
+  localStorage.setItem("rebarProjectContentOnly", JSON.stringify(data));
+  alert("브라우저에 결과를 저장했습니다. PDF 원본은 저장되지 않습니다.");
 }
 
 function loadProject() {
-  const raw = localStorage.getItem("rebarProject");
-  if (!raw) return alert("저장된 프로젝트가 없습니다.");
+  const raw = localStorage.getItem("rebarProjectContentOnly");
+  if (!raw) return alert("저장된 결과가 없습니다.");
   const data = JSON.parse(raw);
   $("projectName").value = data.projectName || "";
   state.pdfFileName = data.pdfFileName || "";
@@ -547,6 +581,7 @@ $("btnClearAll").addEventListener("click", clearAll);
 $("partFilter").addEventListener("change", renderResultTable);
 $("dongFilter").addEventListener("change", renderResultTable);
 $("symbolFilter").addEventListener("input", renderResultTable);
+
 $("btnRememberKey").addEventListener("click", () => {
   localStorage.setItem("geminiApiKey", $("apiKey").value.trim());
   alert("이 브라우저 localStorage에 저장했습니다.");
@@ -555,11 +590,16 @@ $("btnForgetKey").addEventListener("click", () => {
   localStorage.removeItem("geminiApiKey");
   $("apiKey").value = "";
 });
+
 $("btnExportJson").addEventListener("click", () => {
   downloadText("rebar-analysis.json", JSON.stringify({ results: state.results }, null, 2), "application/json;charset=utf-8");
 });
-$("btnExportCsv").addEventListener("click", () => downloadText("rebar-analysis.csv", "\ufeff" + toCsv(flattenResults()), "text/csv;charset=utf-8"));
-$("btnExportExcelCsv").addEventListener("click", () => downloadText("rebar-analysis-excel.csv", "\ufeff" + toCsv(flattenResults()), "text/csv;charset=utf-8"));
+$("btnExportCsv").addEventListener("click", () => {
+  downloadText("rebar-analysis.csv", "\ufeff" + toCsv(flattenResults()), "text/csv;charset=utf-8");
+});
+$("btnExportExcelCsv").addEventListener("click", () => {
+  downloadText("rebar-analysis-excel.csv", "\ufeff" + toCsv(flattenResults()), "text/csv;charset=utf-8");
+});
 
 const savedKey = localStorage.getItem("geminiApiKey");
 if (savedKey) $("apiKey").value = savedKey;
