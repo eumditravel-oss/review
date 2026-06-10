@@ -1,0 +1,30 @@
+{
+  projectName: "[현대엔지니어링]용인 TEL 반도체 제조장비 T",
+  dongName: "FAB",
+  partName: "기초",
+  pageNumber: 1
+}
+```
+
+## 예시 코드
+
+```ts
+import type { PageHeader } from "../types/rebar";
+
+const PART_NAMES = ["기초", "기둥", "보", "슬라브", "옹벽", "계단"];
+
+export function extractHeader(text: string): PageHeader {
+  const projectMatch = text.match(/\[공사명\]\s*(.*?)\s*\[동명\]/);
+  const dongMatch = text.match(/\[동명\]\s*(.*?)\s*\(동별범위\)/);
+  const pageMatch = text.match(/(\d+)\s*Page/);
+
+  const partName =
+    PART_NAMES.find((part) => text.includes(part)) ?? "미분류";
+
+  return {
+    projectName: projectMatch?.[1]?.trim() ?? "",
+    dongName: dongMatch?.[1]?.trim() ?? "",
+    partName,
+    pageNumber: pageMatch ? Number(pageMatch[1]) : 0
+  };
+}
