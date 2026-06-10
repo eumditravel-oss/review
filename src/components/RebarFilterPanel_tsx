@@ -1,0 +1,70 @@
+import type { RebarProject } from "../types/rebar";
+
+type Filters = {
+  partName: string;
+  dongName: string;
+  status: string;
+  keyword: string;
+};
+
+type Props = {
+  project: RebarProject;
+  filters: Filters;
+  onChange: (filters: Filters) => void;
+};
+
+export function RebarFilterPanel({ project, filters, onChange }: Props) {
+  const dongNames = project.buildings.map((b) => b.dongName);
+
+  return (
+    <div className="rebar-filter-panel">
+      <h2>필터</h2>
+
+      <label>
+        파트
+        <select
+          value={filters.partName}
+          onChange={(e) => onChange({ ...filters, partName: e.target.value })}
+        >
+          {["전체", "기초", "기둥", "보", "슬라브", "옹벽", "계단"].map((part) => (
+            <option key={part} value={part}>{part}</option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        동명
+        <select
+          value={filters.dongName}
+          onChange={(e) => onChange({ ...filters, dongName: e.target.value })}
+        >
+          <option value="전체">전체</option>
+          {dongNames.map((dong) => (
+            <option key={dong} value={dong}>{dong}</option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        상태
+        <select
+          value={filters.status}
+          onChange={(e) => onChange({ ...filters, status: e.target.value })}
+        >
+          {["전체", "자동추출", "확인필요", "수동수정", "확인완료", "제외"].map((status) => (
+            <option key={status} value={status}>{status}</option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        부호 검색
+        <input
+          value={filters.keyword}
+          onChange={(e) => onChange({ ...filters, keyword: e.target.value })}
+          placeholder="예: MF1, SRC2, B1"
+        />
+      </label>
+    </div>
+  );
+}
