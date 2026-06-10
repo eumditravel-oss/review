@@ -1,0 +1,22 @@
+import type { RebarItem } from "../types/rebar";
+
+type Props = {
+  item: RebarItem;
+};
+
+export function PdfPageViewer({ item }: Props) {
+  return (
+    <section className="pdf-page-viewer">
+      <h2>원본 보기</h2>
+      <div className="meta">
+        Page {item.page} / Card {item.cardIndex}
+      </div>
+
+      {item.cardImageUrl ? (
+        <img src={item.cardImageUrl} alt="배근 카드 원본" />
+      ) : (
+        <div className="empty">카드 이미지가 없습니다.</div>
+      )}
+    </section>
+  );
+}
